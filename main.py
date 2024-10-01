@@ -8,8 +8,9 @@ import asyncio
 # Initialize Flask app
 app = Flask(__name__)
 
-# Initialize Discord bot without special intents
-bot = commands.Bot(command_prefix=';')
+# Initialize Discord bot with default intents
+intents = discord.Intents.default()  # Use default intents without any privileged intents
+bot = commands.Bot(command_prefix=';', intents=intents)
 
 @app.route('/')
 def home():
