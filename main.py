@@ -3,16 +3,13 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 from flask import Flask
+import asyncio
 
 # Initialize Flask app
 app = Flask(__name__)
 
-# Initialize Discord bot with intents
-intents = discord.Intents.default()
-intents.members = True  # Enable if you need member-related data
-intents.presences = True  # Enable if you need presence-related data
-
-bot = commands.Bot(command_prefix=';', intents=intents)
+# Initialize Discord bot without special intents
+bot = commands.Bot(command_prefix=';')
 
 @app.route('/')
 def home():
@@ -48,8 +45,15 @@ async def defer_response(interaction: discord.Interaction):
     await asyncio.sleep(10)  # Use asyncio.sleep for non-blocking delay
     await interaction.edit_original_response(content='Replying after 10 seconds!')
 
+async def main():
+    # Start the Discord bot
+    await bot.start(os.getenv('token'))
+
 if __name__ == "__main__":
-    # Start the bot and Flask app
+    # Start the Flask app in a separate thread
     port = int(os.environ.get("PORT", 5000))  # Use PORT from environment, default to 5000
-    bot.loop.create_task(app.run_task(host='0.0.0.0', port=port))  # Run Flask app
-    bot.run(os.getenv('token'))  # Run the Discord bot
+    loop = asyncio.get_event_loop()
+    
+    # Start Flask app in a separate task
+    loop.run_in_executor(None, app.run, '0.0.0.0', port)  # Run Flask app
+    loop.run_until_complete(main())  # Run the Discord bot
